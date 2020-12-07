@@ -74,12 +74,25 @@ def poly_fit(X,y):
     
     print('fit param',lr.coef_[1:],lr.intercept_)
     
+def poly_fit_train_test(X,y,seed,deg, ax = None):
+    """
+        Takes:
+            - X : covariable matrix
+            - y : dependent variable matrix 
+            - seed : random seed to determine train and test set
+            - deg : degree of the polynomial to fit
+            - ax = None : matplotlib ax to plot the fit (will not be plotted if None)
 
-def poly_fit_train_test(X,y,seed,deg,plot=True):
+        Returns:
+            ( float , float ) : R-squared on the train and the test set
+    """
     
     poly = PolynomialFeatures(degree=deg)#here we settle for a third degree polynomial object
     X_poly=poly.fit_transform(X)#do the actual fit and transformation of data
-    
+        
+    # we split X and y into a test set and train set
+    # the train set will be used to fit
+    # the test set will be used to evaluate the fit
     X_train, X_test, y_train, y_test = train_test_split(X_poly, y,
                                                    random_state=seed,test_size=0.5)
     
@@ -87,50 +100,37 @@ def poly_fit_train_test(X,y,seed,deg,plot=True):
     #print(X_poly)
     lr=LinearRegression()
     lr.fit(X_train,y_train)
-    y_predict=lr.predict(X_train)
-    R2=r2_score(y_train,y_predict)
-    R2_train=R2
-    MSE=mean_squared_error(y_train,y_predict)
-    y_predict=lr.predict(X_test)
-    R2=r2_score(y_test,y_predict)
-    MSE=mean_squared_error(y_test,y_predict)
+    
+    # R2 with train set
+    y_train_predict=lr.predict(X_train)
+    R2_train=r2_score(y_train,y_train_predict)
+    MSE_train=mean_squared_error(y_train,y_train_predict)
+
+    # R2 with test set
+    y_test_predict=lr.predict(X_test)
+    R2=r2_score(y_test,y_test_predict)
+    MSE=mean_squared_error(y_test,y_test_predict)
     
     
-    if plot==True:
-        fig, ax = plt.subplots(1, 2,figsize=(10,5))
-        fig.subplots_adjust(top=0.5)
-        y_predict=lr.predict(X_train)
-        R2=r2_score(y_train,y_predict)
-        R2_train=R2
-        MSE=mean_squared_error(y_train,y_predict)
-        xx=sorted([[u,v] for u,v in zip(X_train[:,1],y_predict)],key=itemgetter(0))
-        ax[0].plot(X_train[:,1],y_train,'ko',label='Data')
-        ax[0].plot([u[0] for u in xx],[u[1] for u in xx],'r-.',label='Predicted')
-        ax[0].legend(loc='best',fontsize=10)
-        ax[0].set_title('Known data R2={0:.2f}, MSE={1:.2f}'.format(R2,MSE),fontsize=13)
-        ax[0].set_xlabel("Number of pedestrians per ha per min",fontsize=13)
-        ax[0].set_ylabel("Breeding density(individuals per ha)",fontsize=13)
-        ax[0].set_xlim([0,40])
-        ax[0].set_ylim([-75,250])
+    if not ax is None :
 
-        fig.suptitle(' '.join(['fit deg='+str(deg)+' param',str(lr.coef_[1:]),str(lr.intercept_)]), fontsize=16,y=1)
+        # horrible code to sort the points        
+        y_predict = lr.predict(X_poly)
+        xx , yy = zip( * sorted([[u,v] for u,v in zip(X_poly[:,1],y_predict)],key=itemgetter(0)) )
+        
+        ax.plot( X_train[:,1], y_train , marker = 'o' , linestyle='None' , color = 'teal' , label = 'train' )
+        ax.plot( X_test[:,1], y_test , marker = 'o' , linestyle='None' , color = 'orange' , label = 'test' )
+        
+        ax.plot(xx , yy ,'r--' , label='predicted')
+        
+        ax.set_title('train : R2={0:.2f}, MSE={1:.2f}\n test : R2={2:.2f}, MSE={3:.2f}'.format(R2_train,MSE_train,
+                                                                                               R2,MSE),
+                     fontsize=13)
 
-        y_predict=lr.predict(X_test)
-        R2=r2_score(y_test,y_predict)
-        MSE=mean_squared_error(y_test,y_predict)
-        xx=sorted([[u,v] for u,v in zip(X_test[:,1],y_predict)],key=itemgetter(0))
-        ax[1].plot(X_test[:,1],y_test,'ko',label='Data')
-        ax[1].plot([u[0] for u in xx],[u[1] for u in xx],'r-.',label='Predicted')
-        ax[1].legend(loc='best',fontsize=10)
-        ax[1].set_title('New data R2={0:.2f}, MSE={1:.2f}'.format(R2,MSE),fontsize=13)
-        ax[1].set_xlabel("Number of pedestrians per ha per min",fontsize=13)
-        ax[1].set_ylabel("Breeding density(individuals per ha)",fontsize=13)
-        ax[1].set_xlim([0,40])
-        ax[1].set_ylim([-75,250])
+        ax.legend()
 
-
-        #print('fit deg='+str(deg)+' param',lr.coef_[1:],lr.intercept_)
-        plt.tight_layout()
+        
+        
     return R2_train, R2
 
 
