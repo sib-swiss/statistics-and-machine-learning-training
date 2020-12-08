@@ -838,3 +838,161 @@ class BlockingTimeSeriesSplit():
             stop = start + k_fold_size
             mid = int(0.8 * (stop - start)) + start
             yield indices[start: mid], indices[mid + margin: stop]
+
+
+#this is not important. it is just to plot those graphs that will make things easier for you to understand
+# Just pay attention to the librairies involved and the two first lines of code
+from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import roc_curve, auc
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.preprocessing import label_binarize
+from scipy import interp
+from itertools import cycle
+def countour_lr_more(p,X,y,c,mult):
+    models = LogisticRegression(penalty = p,C=c, multi_class=mult)# Create the logistic regresison object(with 3 main hyperparameters!!)
+    # penalty is either l1 or l2, C is how much weight we put on the regularization, multi_calss is how we proceed when multiclasses
+    models = models.fit(X, y)
+    dico_color={0:'blue',1:'white',2:'red'}
+
+    titles = 'Logistic regression penalty='+str(p)+' C='+str(c)
+
+    fig1, ax1 = plt.subplots(1,1)
+        #plt.subplots_adjust(wspace=0.4, hspace=0.4)
+    #plt.subplot(1,2,1)
+    X0, X1 = X[:, 0], X[:, 1]
+    xx, yy = make_meshgrid(X0, X1)
+
+
+
+    plot_contours(ax1, models, xx, yy,cmap=plt.cm.coolwarm, alpha=0.8)
+    ax1.scatter(X0, X1, c=y, cmap=plt.cm.coolwarm, s=20, edgecolors='k')
+    interc=models.intercept_
+    wei=models.coef_
+    for i in range(len(interc)):
+        ax1.plot([xx.min(),xx.max()],[-(interc[i]+wei[i][0]*xx.min())/wei[i][1],-(interc[i]+wei[i][0]*xx.max())/wei[i][1]],
+                 color=dico_color[i],ls='--')
+    ax1.set_xlim(xx.min(), xx.max())
+    ax1.set_ylim(yy.min(), yy.max())
+    ax1.set_xticks(())
+    ax1.set_yticks(())
+    ax1.set_title(titles)
+        #plt.savefig('C:\\Users\\sebas\\Desktop\\cours_scikit-learn\\Iris_example_knn_1_'+str(i)+'.pdf')
+        
+    plt.show()
+    
+    
+    xx = np.linspace(np.min(X0)-5, np.max(X0)+5, 100)
+    yy = np.linspace(np.min(X1)-5, np.max(X1)+5, 100).T
+    xx, yy = np.meshgrid(xx, yy)
+    Xfull = np.c_[xx.ravel(), yy.ravel()]
+    
+    y_pred = models.predict(X)
+    accuracy = accuracy_score(y, y_pred)
+    #print("Accuracy (train) for %s: %0.1f%% " % (name, accuracy * 100))
+
+    # View probabilities:
+    probas = models.predict_proba(Xfull)
+    n_classes = np.unique(y_pred).size
+    
+    plt.figure(figsize=(10,10*n_classes))
+    for k in range(n_classes):
+        plt.subplot(1, n_classes, k + 1)
+        #plt.title("Class %d" % k)
+        if k == 0:
+            plt.ylabel('LogiReg')
+        imshow_handle = plt.imshow(probas[:, k].reshape((100, 100)),extent=(np.min(X0)-5, np.max(X0)+5, np.min(X1)-5, np.max(X1)+5), origin='lower',cmap='plasma')
+        plt.xticks(())
+        plt.xlim([np.min(X0)-5, np.max(X0)+5])
+        plt.ylim([np.min(X1)-5, np.max(X1)+5])
+        plt.yticks(())
+        plt.title('Class '+str(k))
+        for i in range(len(interc)):
+            plt.plot([np.min(X0)-5,np.max(X0)+5],[-(interc[i]+wei[i][0]*(np.min(X0)-5))/wei[i][1],-(interc[i]+wei[i][0]*(np.max(X0)+5))/wei[i][1]],
+                 color=dico_color[i],ls='--')
+        idx = (y_pred == k)
+        
+        if idx.any():
+            
+            plt.scatter(X[idx, 0], X[idx, 1], marker='o', c=[dico_color[h] for h in y[idx]], edgecolor='k')
+
+    ax = plt.axes([0.15, 0.45, 0.7, 0.01])
+    plt.title("Probability")
+    plt.colorbar(imshow_handle, cax=ax, orientation='horizontal')
+
+    plt.show()
+    if n_classes>2:
+        y = label_binarize(y, classes=np.arange(0,n_classes,1))
+        classifier = OneVsRestClassifier(LogisticRegression(penalty = p,C=c))
+        y_score = classifier.fit(X, y).decision_function(X)
+
+        # Compute ROC curve and ROC area for each class
+        fpr = dict()
+        tpr = dict()
+        roc_auc = dict()
+        for i in range(n_classes):
+            fpr[i], tpr[i], _ = roc_curve(y[:, i], y_score[:, i])
+            roc_auc[i] = auc(fpr[i], tpr[i])
+
+        # Compute micro-average ROC curve and ROC area
+        fpr["micro"], tpr["micro"], _ = roc_curve(y.ravel(), y_score.ravel())
+        roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+        # First aggregate all false positive rates
+        all_fpr = np.unique(np.concatenate([fpr[i] for i in range(n_classes)]))
+
+        # Then interpolate all ROC curves at this points
+        mean_tpr = np.zeros_like(all_fpr)
+        for i in range(n_classes):
+            mean_tpr += interp(all_fpr, fpr[i], tpr[i])
+
+        # Finally average it and compute AUC
+        mean_tpr /= n_classes
+
+        fpr["macro"] = all_fpr
+        tpr["macro"] = mean_tpr
+        roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
+        lw = 3
+        # Plot all ROC curves
+        plt.figure(figsize=(7,7))
+        plt.plot(fpr["micro"], tpr["micro"],
+                 label='micro-average ROC curve (area = {0:0.2f})'
+                       ''.format(roc_auc["micro"]),
+                 color='deeppink', linestyle=':', linewidth=4)
+
+        plt.plot(fpr["macro"], tpr["macro"],
+                 label='macro-average ROC curve (area = {0:0.2f})'
+                       ''.format(roc_auc["macro"]),
+                 color='navy', linestyle=':', linewidth=4)
+
+        colors = cycle(['aqua', 'darkorange', 'cornflowerblue'])
+        for i, color in zip(range(n_classes), colors):
+            plt.plot(fpr[i], tpr[i], color=color, lw=lw,
+                     label='ROC curve of class {0} (area = {1:0.2f})'
+                     ''.format(i, roc_auc[i]))
+
+        plt.plot([0, 1], [0, 1], 'k--', lw=lw)
+        plt.xlim([0.0, 1.0])
+        plt.ylim([0.0, 1.05])
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
+        #plt.title('Some extension of Receiver operating characteristic to multi-class')
+        plt.title('Multi class Receiver operating characteristic curve')
+        plt.legend(loc="lower right")
+        plt.show()
+    else:
+        y_score_logi_r_c = models.decision_function(X)
+        fpr_logi_r_c, tpr_logi_r_c, thre = roc_curve(y, y_score_logi_r_c)
+        roc_auc_logi_r_c = auc(fpr_logi_r_c, tpr_logi_r_c)
+        score=models.score(X,y)
+
+        plt.figure()
+        plt.xlim([-0.01, 1.00])
+        plt.ylim([-0.01, 1.01])
+        plt.plot(fpr_logi_r_c, tpr_logi_r_c, lw=3, label='LogRegr ROC curve\n (area = {:0.2f})\n Acc={:1.3f}'.format(roc_auc_logi_r_c,score))
+        plt.xlabel('False Positive Rate', fontsize=16)
+        plt.ylabel('True Positive Rate', fontsize=16)
+        plt.title('ROC curve (logistic classifier)', fontsize=16)
+        plt.legend(loc='lower right', fontsize=13)
+        plt.plot([0, 1], [0, 1], color='navy', lw=3, linestyle='--')
+        plt.axes().set_aspect('equal')
+        plt.show()
