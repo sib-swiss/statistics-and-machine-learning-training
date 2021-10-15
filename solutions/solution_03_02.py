@@ -1,0 +1,74 @@
+from sklearn.ensemble import RandomForestRegressor
+
+## Read in data as pandas dataframe 
+features = pd.read_csv('data/One_hot_temp.csv')
+features.head()
+
+
+## train/test split
+y = np.array(features['actual'])
+# Remove the labels from the features
+# axis 1 refers to the columns
+X= features.drop(['Unnamed: 0', 'year', 'month', 'day',
+       'actual', 'week_Fri', 'week_Mon', 'week_Sat', 'week_Sun', 'week_Thurs',
+       'week_Tues', 'week_Wed'], axis = 1)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.25,random_state = 42)
+
+
+## setup and fit pipeline
+grid_values = {'criterion': ['mse'],
+               'n_estimators':np.arange(600,1200,300), 
+               'max_depth':np.arange(2,22,5),
+               'min_samples_split':np.arange(2,20,4),
+              'min_samples_leaf':np.arange(1,20,4)}# define the hyperparameters you want to test
+#with the range over which you want it to be tested.
+
+grid_tree_acc = GridSearchCV(RandomForestRegressor(), param_grid = grid_values, scoring='r2',n_jobs=-1)#Feed it to the GridSearchCV with the right
+#score over which the decision should be taken
+
+grid_tree_acc.fit(X_train, y_train)
+
+print('Grid best parameter (max. r2): ', grid_tree_acc.best_params_)#get the best parameters
+print('Grid best score (r2): ', grid_tree_acc.best_score_)#get the best score calculated from the train/validation
+#dataset
+
+## evaluate the model on the test set
+# get the equivalent score on the test dataset : again this is the important metric
+y_decision_fn_scores_acc=grid_tree_acc.score(X_test,y_test)
+print('Grid best parameter (max. r2) model on test: ', y_decision_fn_scores_acc)
+
+## get the feature importances 
+w=grid_tree_acc.best_estimator_.feature_importances_#get the weights
+
+sorted_features=sorted([[list(X.columns)[i],abs(w[i])] for i in range(len(w))],key=itemgetter(1),reverse=True)
+
+print('Features sorted per importance in discriminative process')
+for f,w in sorted_features:
+    print('{:>20}\t{:.3f}'.format(f,w))
+
+## using permutation to get the importances
+from sklearn.inspection import permutation_importance
+
+feature_importance = W
+sorted_idx = np.argsort(feature_importance)
+pos = np.arange(sorted_idx.shape[0]) + .5
+fig = plt.figure(figsize=(12, 6))
+plt.subplot(1, 2, 1)
+plt.barh(pos, feature_importance[sorted_idx], align='center')
+plt.yticks(pos, np.array(list(X.columns))[sorted_idx])
+plt.title('Feature Importance (MDI)',fontsize=10)
+
+result = permutation_importance(grid_tree_acc.best_estimator_, 
+                                X_test, y_test, n_repeats=10,
+                                random_state=42, n_jobs=2)
+
+sorted_idx = result.importances_mean.argsort()
+plt.subplot(1, 2, 2)
+plt.boxplot(result.importances[sorted_idx].T,
+            vert=False, labels=np.array(list(X.columns))[sorted_idx])
+plt.title("Permutation Importance (test set)",fontsize=10)
+fig.tight_layout()
+plt.show()
+
+
