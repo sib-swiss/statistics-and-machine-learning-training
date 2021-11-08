@@ -485,7 +485,7 @@ def countour_lr(p,X,y,c,mult):
         plt.title('ROC curve (logistic classifier)', fontsize=16)
         plt.legend(loc='lower right', fontsize=13)
         plt.plot([0, 1], [0, 1], color='navy', lw=3, linestyle='--')
-        plt.axes().set_aspect('equal')
+        #plt.axes().set_aspect('equal')
         plt.show()
 
 from sklearn import svm
@@ -513,7 +513,7 @@ def countour_SVM(X,y,c,ker,deg,gam,mult):
     ax1.scatter(X0, X1, c=y, cmap=plt.cm.coolwarm, s=20, edgecolors='k')
     Z = np.asarray(models.decision_function(np.c_[xx.ravel(), yy.ravel()]))
     #print(np.shape(Z),Z.shape[0],print(np.shape(Z[:,0])))
-    print(Z,np.shape(Z),type(Z))
+    #print(Z,np.shape(Z),type(Z))
     if ker=='linear':
         if len(set(y))==2:
             Zr = Z.reshape(xx.shape)
@@ -640,7 +640,7 @@ def countour_SVM(X,y,c,ker,deg,gam,mult):
         plt.title('ROC curve (logistic classifier)', fontsize=16)
         plt.legend(loc='lower right', fontsize=13)
         plt.plot([0, 1], [0, 1], color='navy', lw=3, linestyle='--')
-        plt.axes().set_aspect('equal')
+        #plt.axes().set_aspect('equal')
         plt.show()
 
 
@@ -994,5 +994,5 @@ def countour_lr_more(p,X,y,c,mult):
         plt.title('ROC curve (logistic classifier)', fontsize=16)
         plt.legend(loc='lower right', fontsize=13)
         plt.plot([0, 1], [0, 1], color='navy', lw=3, linestyle='--')
-        plt.axes().set_aspect('equal')
+        #plt.axes().set_aspect('equal')
         plt.show()

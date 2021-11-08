@@ -70,11 +70,13 @@ for f,w in sorted_features:
 from sklearn.inspection import permutation_importance
 
 feature_importance = W
+std = np.std([tree.feature_importances_ for tree in grid_tree_acc.best_estimator_.estimators_], axis=0)
+
 sorted_idx = np.argsort(feature_importance)
 pos = np.arange(sorted_idx.shape[0]) + .5
 fig = plt.figure(figsize=(12, 6))
 plt.subplot(1, 2, 1)
-plt.barh(pos, feature_importance[sorted_idx], align='center')
+plt.barh(pos, feature_importance[sorted_idx],xerr=std[sorted_idx][::-1], align='center')
 plt.yticks(pos, np.array(list(X.columns))[sorted_idx])
 plt.title('Feature Importance (MDI)',fontsize=10)
 
@@ -94,4 +96,3 @@ plt.plot(y,RF.predict(X),'ro')
 plt.xlabel('True values')
 plt.ylabel('Predicted values')
 plt.title(str(sc.stats.pearsonr(y,RF.predict(X))[0]))
-
