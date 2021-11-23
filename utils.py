@@ -490,7 +490,7 @@ def countour_lr(p,X,y,c,mult):
 
 from sklearn import svm
 
-def countour_SVM(X,y,c,ker,deg,gam,mult):
+def countour_SVM(X,y,c,ker,deg=2,gam=1,mult='ovr'):
     models = svm.SVC(C=c, kernel=ker, degree=deg, gamma= gam, decision_function_shape=mult,probability=True)
     #those are all the hyperparameters that are, in my opinion, important to tune. C is again the good old inverse of the weight for l2 
     #regularization, kernel is the dot product you want to use, degree is the degree of the polynomial kernel you want to use,
