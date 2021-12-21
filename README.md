@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5795640.svg)](https://doi.org/10.5281/zenodo.5795640)
+
 This is the github repository for the "statistics and machine learning for life science" at the [SIB](https://www.sib.swiss).
 
 This course was designed to guide participants in the exploration of the concepts of statistical modelling, 
@@ -13,3 +15,9 @@ The course is organized in several, numbered, jupyter notebooks, each correspond
 
 The course does not require any particular expertise with jupyter notebooks to be followed, but if it is the first time you encounter them we recommend this [gentle introduction](https://realpython.com/jupyter-notebook-introduction/).
 
+
+## course material citation
+
+Please cite as : 
+
+Sébastien Boyer, & Wandrille Duchemin. (2021, December 21). December 2021 course edition : Statistics and Machine Learning for Life Sciences. Zenodo. https://doi.org/10.5281/zenodo.5795640
