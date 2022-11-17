@@ -15,18 +15,15 @@ LMstat , LMpval , Fstat , Fpval = het_white( results.resid , model.exog )
 print("\n\tWhite test for heteroscedasticity p-value:" , LMpval)
 
 ## plotting results.
-## the predict function will let us compute the prediction of the model from a single value of number of pedestrian
-def predict( x ):
-    return (results.params['Intercept'] + 
-            x    *  results.params['Number'] +
-            x**2 *  results.params['Number2'] +
-            x**3 *  results.params['Number3'] )
 
-xx=np.linspace(min( df.Number ),max( df.Number),200)
+# creating input for many different number of pedestrians in order to plot the curve
+xx=pd.DataFrame( {"Number" : np.linspace(min( df.Number ),max( df.Number),200) })
+xx["Number2"] = xx["Number"]**2
+xx["Number3"] = xx["Number"]**3
 
 fig, ax = plt.subplots(figsize=(8,6))
 
 ax.plot(df.Number, df.Breeding, 'o', label="observed points")
 ax.plot(df.Number, results.fittedvalues , 'or', label="fitted points")
-ax.plot(xx, predict(xx), 'r')
+ax.plot(xx.Number, results.predict(xx), 'r')
 ax.legend()

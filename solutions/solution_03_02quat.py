@@ -1,7 +1,5 @@
 ## Even better splitting strategy
 
-from IPython.display import Image
-Image('image/BlockedTimeSeriesSplit.png')
 
 # we define our own splitter class
 class BlockingTimeSeriesSplit():
@@ -39,11 +37,10 @@ X_train=np.array(X)[:int(len(X.index)*0.75),:]
 X_test=np.array(X)[int(len(X.index)*0.75):,:]
 y_train=np.array(y)[:int(len(X.index)*0.75)]
 y_test=np.array(y)[int(len(X.index)*0.75):]
-grid_values = {'criterion': ['mse'],
-               'n_estimators':np.arange(600,1200,300), 
-               'max_depth':np.arange(2,22,5),
-               'min_samples_split':np.arange(2,20,4),
-              'min_samples_leaf':np.arange(1,20,4)}# define the hyperparameters you want to test
+grid_values = {'criterion': ['squared_error'],
+                'max_depth':[2,5,7],
+               'min_samples_split':[4],
+              'min_samples_leaf':[2]}
 #with the range over which you want it to be tested.
 tscv = BlockingTimeSeriesSplit(n_splits=5)
 
@@ -81,7 +78,7 @@ print(sorted_features)
 
 from sklearn.inspection import permutation_importance
 
-feature_importance = W
+feature_importance = RF.feature_importances_
 std = np.std([tree.feature_importances_ for tree in grid_tree_acc.best_estimator_.estimators_], axis=0)
 
 sorted_idx = np.argsort(feature_importance)

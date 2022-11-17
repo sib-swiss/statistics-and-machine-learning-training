@@ -5,15 +5,11 @@ import statsmodels.api as sm
 df_beetles=pd.read_csv('data/beetle.csv' , index_col=0)
 df_beetles
 
-
 # setting up the model
-y=df_beetles[["ndied","nalive"]]
 #since we want our random variable to be represented by a binomial we need two parameters
 #to define a binomial.
-
-X = df_beetles["dose"]
-X = sm.add_constant(X)
-model = sm.GLM(y, X,family=sm.families.Binomial())
+model = smf.glm("ndied+nalive ~ dose", data=df_beetles,
+                family=sm.families.Binomial() )
 results = model.fit()
 
 print( results.summary() )

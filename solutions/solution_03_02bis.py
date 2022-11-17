@@ -11,12 +11,11 @@ X= features.drop(['Unnamed: 0', 'year', 'month', 'day',
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.25,
                                                                            random_state = 42)
-
-grid_values = {'criterion': ['mse'],
-               'n_estimators':np.arange(600,1200,300), 
-               'max_depth':np.arange(2,22,5),
-               'min_samples_split':np.arange(2,20,4),
-              'min_samples_leaf':np.arange(1,20,4)}# define the hyperparameters you want to test
+grid_values = {'criterion': ['squared_error'],
+               'n_estimators':[300,600,900], 
+               'max_depth':[2,5,7],
+               'min_samples_split':[4],
+              'min_samples_leaf':[2]}# define the hyperparameters you want to test
 #with the range over which you want it to be tested.
 
 grid_tree_acc = GridSearchCV(RandomForestRegressor(), param_grid = grid_values, scoring='r2',n_jobs=-1)#Feed it to the GridSearchCV with the right
@@ -37,14 +36,14 @@ RF = grid_tree_acc.best_estimator_
 
 W=RF.feature_importances_#get the weights
 
-sorted_features=sorted([[list(X.columns)[i],abs(w[i])] for i in range(len(W))],key=itemgetter(1),reverse=True)
+sorted_features=sorted([[list(X.columns)[i],abs(W[i])] for i in range(len(W))],key=itemgetter(1),reverse=True)
 
 print('Features sorted per importance in discriminative process')
 for f,w in sorted_features:
     print('{:>20}\t{:.3f}'.format(f,w))
     
 from sklearn.inspection import permutation_importance
-feature_importance = W
+feature_importance = RF.feature_importances_
 std = np.std([tree.feature_importances_ for tree in grid_tree_acc.best_estimator_.estimators_], axis=0)
 
 sorted_idx = np.argsort(feature_importance)

@@ -1,12 +1,7 @@
 ## Our splitting strategy doesn't seem to represent the reality of the process....
 ## inspired from https://hub.packtpub.com/cross-validation-strategies-for-time-series-forecasting-tutorial/
 
-## our splitting strategy before : randomly picking points. 
-## proposed splitting strategy:
-from IPython.display import Image
-Image('image/TimeSeriesSplit.png')
-
-
+import scipy as sc
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import TimeSeriesSplit
 y = np.array(features['actual'])
@@ -24,11 +19,11 @@ X_test=np.array(X)[int(len(X.index)*0.75):,:]
 y_train=np.array(y)[:int(len(X.index)*0.75)]
 y_test=np.array(y)[int(len(X.index)*0.75):]
 
-grid_values = {'criterion': ['mse'],
-               'n_estimators':np.arange(600,1200,300), 
-               'max_depth':np.arange(2,22,5),
-               'min_samples_split':np.arange(2,20,4),
-              'min_samples_leaf':np.arange(1,20,4)}# define the hyperparameters you want to test
+grid_values = {'criterion': ['squared_error'],
+               'n_estimators':[300,600,900], 
+               'max_depth':[2,5,7],
+               'min_samples_split':[4],
+              'min_samples_leaf':[2]}# define the hyperparameters you want to test
 
 #with the range over which you want it to be tested.
 tscv = TimeSeriesSplit()
@@ -69,7 +64,7 @@ for f,w in sorted_features:
     
 from sklearn.inspection import permutation_importance
 
-feature_importance = W
+feature_importance = RF.feature_importances_#get the weights
 std = np.std([tree.feature_importances_ for tree in grid_tree_acc.best_estimator_.estimators_], axis=0)
 
 sorted_idx = np.argsort(feature_importance)

@@ -170,7 +170,7 @@ def plot_contours(ax, clf, xx, yy, **params):
     out = ax.contourf(xx, yy, Z, **params)
     return out
 
-def countour_lr_kypho(X,y,df,p='l2',c=10**8):#(number of nearest neighbors, feature matrix, label, voting rule)
+def contour_lr_kypho(X,y,df,p='l2',c=10**8):#(number of nearest neighbors, feature matrix, label, voting rule)
     models = LogisticRegression(penalty = p,C=c,class_weight='balanced')
     models = models.fit(X, y) 
 
@@ -200,7 +200,7 @@ def countour_lr_kypho(X,y,df,p='l2',c=10**8):#(number of nearest neighbors, feat
     plt.show()
     print([[w,list(df.columns)[i]]for i,w in enumerate(models.coef_[0])]+['intercept',models.intercept_])
     
-def countour_lr_kypho_train_test(df,y,seed,p='l2',c=10**8,plot=True):#(number of nearest neighbors, feature matrix, label, voting rule)
+def contour_lr_kypho_train_test(df,y,seed,p='l2',c=10**8,plot=True):#(number of nearest neighbors, feature matrix, label, voting rule)
     
     X_train, X_test, y_train, y_test = train_test_split(df, y,
                                                    random_state=seed)
@@ -301,7 +301,7 @@ from scipy import interp
 from itertools import cycle
 from sklearn.preprocessing import StandardScaler
 
-def countour_lr(p,X,y,c,mult):
+def contour_lr(p,X,y,c,mult):
     models = LogisticRegression(penalty = p,C=c, multi_class=mult)# Create the logistic regresison object(with 3 main hyperparameters!!)
     # penalty is either l1 or l2, C is how much weight we put on the regularization, multi_calss is how we proceed when multiclasses
     X_train, X_test, y_train, y_test = train_test_split(X, y,
@@ -490,7 +490,7 @@ def countour_lr(p,X,y,c,mult):
 
 from sklearn import svm
 
-def countour_SVM(X,y,c,ker,deg=2,gam=1,mult='ovr'):
+def contour_SVM(X,y,c,ker,deg=2,gam=1,mult='ovr'):
     models = svm.SVC(C=c, kernel=ker, degree=deg, gamma= gam, decision_function_shape=mult,probability=True)
     #those are all the hyperparameters that are, in my opinion, important to tune. C is again the good old inverse of the weight for l2 
     #regularization, kernel is the dot product you want to use, degree is the degree of the polynomial kernel you want to use,
@@ -649,7 +649,7 @@ import pydotplus
 from sklearn import tree
 import collections
 from IPython.display import Image
-def countour_tree(X,y,crit,maxd,min_s,min_l,max_f):#to understand what those hyperparameters stand for just check the first example
+def contour_tree(X,y,crit,maxd,min_s,min_l,max_f):#to understand what those hyperparameters stand for just check the first example
     models = DecisionTreeClassifier(criterion=crit,max_depth=maxd,min_samples_split=min_s,min_samples_leaf=min_l,max_features=max_f)
     models = models.fit(X, y) 
 
@@ -699,32 +699,57 @@ def countour_tree(X,y,crit,maxd,min_s,min_l,max_f):#to understand what those hyp
 
 
 from sklearn.ensemble import RandomForestClassifier
+from matplotlib.gridspec import GridSpec
 
-def countour_RF(X,y,n_tree,crit,maxd,min_s,min_l,max_f):
+def contour_RF(X,y,n_tree,crit,maxd,min_s,min_l,max_f):
+    """
+    Performs a classification using a random forest and plots a 2D decision space
+    and then does the same for a single tree classifier with similar hyper parameters for comparison
+    
+    Takes:
+        * X : covariables
+        * y : target
+        * n_tree : number of tree in the forest
+        * crit : impurity criterion
+        * maxd : tree max depth
+        * min_s : minimum number of samples to consider an internal node rule
+        * min_l : minimum number of samples to consider an leaf node rule
+        * max_f : maximum number of features to consider at a node
+    """
+    
     models = RandomForestClassifier(n_tree,criterion=crit,max_depth=maxd,min_samples_split=min_s,min_samples_leaf=min_l,max_features=max_f)
     models = models.fit(X, y) 
     dico_color={0:'blue',1:'white',2:'red'}
         # title for the plots
-    titles = 'Random Forest '+' '.join([str(crit),str(maxd),str(min_s),str(min_l),str(max_f)])
+    titles = 'Random Forest '+' '.join([str(crit),
+                                        str(maxd),
+                                        str(min_s),
+                                        str(min_l),
+                                        str(max_f)])
 
-        # Set-up 2x2 grid for plotting.
-    fig, ax = plt.subplots(1, 1)
-        #plt.subplots_adjust(wspace=0.4, hspace=0.4)
 
+    nCat = len(set(y))
+    
+    fig = plt.figure(constrained_layout=True,figsize=(10,4+np.ceil(nCat/4)*4))
+    gs = GridSpec( 2+ int(np.ceil(nCat/4)), 4, figure=fig)
+    #print( 2+ int(np.ceil(nCat/4)), 4 )
+
+    ### plot 1 : RF contour
+    ax = fig.add_subplot(gs[:2, :2])
+    
     X0, X1 = X[:, 0], X[:, 1]
     xx, yy = make_meshgrid(X0, X1)
     
     Xfull = np.c_[xx.ravel(), yy.ravel()]
 
 
-    plot_contours(ax, models, xx, yy,
-                      cmap=plt.cm.coolwarm, alpha=0.8)
+    plot_contours(ax, models, xx, yy, cmap=plt.cm.coolwarm, alpha=0.8)
     ax.scatter(X0, X1, c=y, cmap=plt.cm.coolwarm, s=20, edgecolors='k')
     ax.set_xlim(xx.min(), xx.max())
     ax.set_ylim(yy.min(), yy.max())
     ax.set_title(titles)
-    plt.show()
     
+    ## probability contour for each category
     xx = np.linspace(np.min(X0)-5, np.max(X0)+5, 100)
     yy = np.linspace(np.min(X1)-5, np.max(X1)+5, 100).T
     xx, yy = np.meshgrid(xx, yy)
@@ -736,46 +761,49 @@ def countour_RF(X,y,n_tree,crit,maxd,min_s,min_l,max_f):
     probas = models.predict_proba(Xfull)
     n_classes = np.unique(y_pred).size
     
-    plt.figure(figsize=(10,10*n_classes))
+
     for k in range(n_classes):
-        plt.subplot(1, n_classes, k + 1)
+        #print(k,2+k//4, k%4)
+        ax = fig.add_subplot(gs[2+k//4, k%4])
+        
         if k == 0:
-            plt.ylabel('Random Forest')
-        imshow_handle = plt.imshow(probas[:, k].reshape((100, 100)),extent=(np.min(X0)-5, np.max(X0)+5, np.min(X1)-5, np.max(X1)+5), origin='lower',cmap='plasma')
-        plt.xticks(())
-        plt.xlim([np.min(X0)-5, np.max(X0)+5])
-        plt.ylim([np.min(X1)-5, np.max(X1)+5])
-        plt.yticks(())
-        plt.title('Class '+str(k))
+            ax.set_ylabel('Random Forest')
+        imshow_handle = ax.imshow(probas[:, k].reshape((100, 100)),
+                                  extent=(np.min(X0)-5, np.max(X0)+5, 
+                                          np.min(X1)-5, np.max(X1)+5), 
+                                  origin='lower',cmap='plasma')
+        ax.set_xticks(())
+        ax.set_xlim([np.min(X0)-5, np.max(X0)+5])
+        ax.set_ylim([np.min(X1)-5, np.max(X1)+5])
+        ax.set_yticks(())
+        ax.set_title('Class '+str(k),fontsize=25)
         
         idx = (y_pred == k)
         
         if idx.any():
             
-            plt.scatter(X[idx, 0], X[idx, 1], marker='o', c=[dico_color[h] for h in y[idx]], edgecolor='k')
+            ax.scatter(X[idx, 0], X[idx, 1],
+                       s=100, marker='o', 
+                       c=[dico_color[h] for h in y[idx]], edgecolor='k')
 
-    ax0 = plt.axes([0.15, 0.35, 0.7, 0.01])
-    plt.title("Probability")
-    plt.colorbar(imshow_handle, cax=ax0, orientation='horizontal')
-
-    plt.show()
     
-    models = DecisionTreeClassifier(criterion=crit,max_depth=maxd,min_samples_split=min_s,min_samples_leaf=min_l,max_features=max_f)
+    ## comparing with a decision tree
+    models = DecisionTreeClassifier(criterion=crit,
+                                    max_depth=maxd,
+                                    min_samples_split=min_s,
+                                    min_samples_leaf=min_l,
+                                    max_features=max_f)
     models = models.fit(X, y) 
 
         # title for the plots
     titles = 'Decision tree '+' '.join([str(crit),str(maxd),str(min_s),str(min_l),str(max_f)])
 
-        # Set-up 2x2 grid for plotting.
-    fig, ax = plt.subplots(1, 1)
-        #plt.subplots_adjust(wspace=0.4, hspace=0.4)
+    ### plot 1 : RF contour
+    ax = fig.add_subplot(gs[:2, 2:])
 
     X0, X1 = X[:, 0], X[:, 1]
     xx, yy = make_meshgrid(X0, X1)
     
-    
-
-
     plot_contours(ax, models, xx, yy,
                       cmap=plt.cm.coolwarm, alpha=0.8)
     ax.scatter(X0, X1, c=y, cmap=plt.cm.coolwarm, s=20, edgecolors='k')
@@ -784,39 +812,12 @@ def countour_RF(X,y,n_tree,crit,maxd,min_s,min_l,max_f):
     ax.set_title(titles)
     plt.show()
     
-    xx = np.linspace(np.min(X0)-5, np.max(X0)+5, 100)
-    yy = np.linspace(np.min(X1)-5, np.max(X1)+5, 100).T
-    xx, yy = np.meshgrid(xx, yy)
-    Xfull = np.c_[xx.ravel(), yy.ravel()]
-    y_pred = models.predict(X)
-    accuracy = accuracy_score(y, y_pred)
-    # View probabilities:
-    probas = models.predict_proba(Xfull)
-    n_classes = np.unique(y_pred).size
-    
-    plt.figure(figsize=(10,10*n_classes))
-    for k in range(n_classes):
-        plt.subplot(1, n_classes, k + 1)
-        if k == 0:
-            plt.ylabel('Decision tree')
-        imshow_handle = plt.imshow(probas[:, k].reshape((100, 100)),extent=(np.min(X0)-5, np.max(X0)+5, np.min(X1)-5, np.max(X1)+5), origin='lower',cmap='plasma')
-        plt.xticks(())
-        plt.xlim([np.min(X0)-5, np.max(X0)+5])
-        plt.ylim([np.min(X1)-5, np.max(X1)+5])
-        plt.yticks(())
-        plt.title('Class '+str(k))
-        
-        idx = (y_pred == k)
-        
-        if idx.any():
-            
-            plt.scatter(X[idx, 0], X[idx, 1], marker='o', c=[dico_color[h] for h in y[idx]], edgecolor='k')
-
-    ax0 = plt.axes([0.15, 0.35, 0.7, 0.01])
-    plt.title("Probability")
-    plt.colorbar(imshow_handle, cax=ax0, orientation='horizontal')
-
+    ax = plt.axes([0,0,1,0.05])
+    plt.title("Probability",fontsize=25)
+    plt.colorbar(imshow_handle, cax=ax, orientation='horizontal')
     plt.show()
+
+
 
 
 
@@ -849,7 +850,7 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.preprocessing import label_binarize
 from scipy import interp
 from itertools import cycle
-def countour_lr_more(p,X,y,c,mult):
+def contour_lr_more(p,X,y,c,mult):
     models = LogisticRegression(penalty = p,C=c, multi_class=mult)# Create the logistic regresison object(with 3 main hyperparameters!!)
     # penalty is either l1 or l2, C is how much weight we put on the regularization, multi_calss is how we proceed when multiclasses
     models = models.fit(X, y)
