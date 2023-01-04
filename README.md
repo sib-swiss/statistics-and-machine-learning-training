@@ -1,4 +1,5 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5795640.svg)](https://doi.org/10.5281/zenodo.5795640)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7504134.svg)](https://doi.org/10.5281/zenodo.7504134)
+
 
 This is the github repository for the "statistics and machine learning for life science" course at [SIB](https://www.sib.swiss).
 
@@ -41,4 +42,4 @@ Note also the `utils.py` file contains many utilitary function we use to visuall
 
 Please cite as : 
 
-Sébastien Boyer, & Wandrille Duchemin. (2021, December 21). December 2021 course edition : Statistics and Machine Learning for Life Sciences. Zenodo. https://doi.org/10.5281/zenodo.5795640
+ * Wandrille Duchemin, Markus Mueller, Jens Settelmeier, & Damir Zhakparov. (2023, January 4). sib-swiss/statistics-and-machine-learning-training: December 2022 course. Zenodo. https://doi.org/10.5281/zenodo.7504134
