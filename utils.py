@@ -26,32 +26,6 @@ from sklearn.metrics import accuracy_score
 
 
 
-
-def make_summary_tables( res ):
-    """ takes a summary from statsmodel fitting results and turn it into 2 dataFrame.
-            - result_general_df : contains general info and fit quality metrics
-            - result_fit_df : coefficient values and confidence intervals
-    """
-
-    # transform second table to csv and read this as a dataFrame
-    result_fit_df = pd.read_csv(StringIO( res.tables[1].as_csv() ), sep=",",index_col=0)
-    result_fit_df.columns = [i.strip() for i in result_fit_df.columns]
-    result_fit_df.index = [i.strip() for i in result_fit_df.index]
-
-    # first table is trickier because the data is spread on to columns, and there is title line
-    L = res.tables[0].as_html().split('\n')
-    L.pop(1) # get rid of the title
-    tmp = pd.read_html('\n'.join(L) , header=None)[0] # read as a dataframe, but with 4 columns 
-
-    names = list(tmp[0]) + list(tmp[2])[:-2] # columns 0 and 2 are metric names
-    values = list(tmp[1]) + list(tmp[3])[:-2] # columns 1 and 3 are the corresponding values
-    # NB : I exclude the last 2 elements which are empty 
-    
-    result_general_df = pd.DataFrame( {'Name': names , 'Value' : values}, index = names , columns=['Value'] )
-    
-    return result_general_df , result_fit_df
-
-
 def poly_fit(X,y):
     
     poly = PolynomialFeatures(degree=3)#here we settle for a third degree polynomial object
@@ -74,13 +48,13 @@ def poly_fit(X,y):
     
     print('fit param',lr.coef_[1:],lr.intercept_)
     
-def poly_fit_train_test(X,y,seed,deg, ax = None):
+def poly_fit_train_test(X,y,seed=None,deg=2, ax = None):
     """
         Takes:
             - X : covariable matrix
             - y : dependent variable matrix 
-            - seed : random seed to determine train and test set
-            - deg : degree of the polynomial to fit
+            - seed = None: random seed to determine train and test set
+            - deg = 2 : degree of the polynomial to fit
             - ax = None : matplotlib ax to plot the fit (will not be plotted if None)
 
         Returns:
@@ -89,7 +63,8 @@ def poly_fit_train_test(X,y,seed,deg, ax = None):
     
     poly = PolynomialFeatures(degree=deg)#here we settle for a third degree polynomial object
     X_poly=poly.fit_transform(X)#do the actual fit and transformation of data
-        
+       
+    
     # we split X and y into a test set and train set
     # the train set will be used to fit
     # the test set will be used to evaluate the fit
@@ -850,6 +825,7 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.preprocessing import label_binarize
 from scipy import interp
 from itertools import cycle
+
 def contour_lr_more(p,X,y,c,mult):
     models = LogisticRegression(penalty = p,C=c, multi_class=mult)# Create the logistic regresison object(with 3 main hyperparameters!!)
     # penalty is either l1 or l2, C is how much weight we put on the regularization, multi_calss is how we proceed when multiclasses

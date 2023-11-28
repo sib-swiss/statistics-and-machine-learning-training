@@ -24,7 +24,7 @@ ax[0].set_ylabel("pearson residuals")
 # results.mu corresponds to the fitted proportion of dead beetle
 # equivalent to : 1./(1+np.exp(-(-14.8230+0.2494*df_beetles["dose"]))) 
 ax[1].plot(results.mu , df_beetles["prop"] , 'bo')
-ax[1].plot( [0,max(y)], [0,max(y)] )
+ax[1].plot( [0,max(df_beetles["prop"])], [0,max(df_beetles["prop"])] )
 ax[1].set_xlabel("predicted values")
 ax[1].set_ylabel("observed values")
 
