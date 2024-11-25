@@ -23,7 +23,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
 import seaborn as sns
 from sklearn.metrics import accuracy_score
-
+from sklearn.tree import plot_tree
 
 
 def poly_fit(X,y):
@@ -272,7 +272,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_curve, auc
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.preprocessing import label_binarize
-from scipy import interp
+from scipy import interpolate as interp
 from itertools import cycle
 from sklearn.preprocessing import StandardScaler
 
@@ -620,10 +620,12 @@ def contour_SVM(X,y,c,ker,deg=2,gam=1,mult='ovr'):
 
 
 from sklearn.tree import DecisionTreeClassifier
-import pydotplus
+
 from sklearn import tree
 import collections
 from IPython.display import Image
+
+
 def contour_tree(X,y,crit,maxd,min_s,min_l,max_f):#to understand what those hyperparameters stand for just check the first example
     models = DecisionTreeClassifier(criterion=crit,max_depth=maxd,min_samples_split=min_s,min_samples_leaf=min_l,max_features=max_f)
     models = models.fit(X, y) 
@@ -648,30 +650,13 @@ def contour_tree(X,y,crit,maxd,min_s,min_l,max_f):#to understand what those hype
     #ax.set_xticks(())
     #ax.set_yticks(())
     ax.set_title(titles)
-        #plt.savefig('C:\\Users\\sebas\\Desktop\\cours_scikit-learn\\Iris_example_knn_1_'+str(i)+'.pdf')
+        
     plt.show()
-    
-    dot_data = tree.export_graphviz(models,
-                                feature_names=['x','y'],
-                                out_file=None,
-                                filled=True,
-                                rounded=True)
-    graph = pydotplus.graph_from_dot_data(dot_data)
-
-    colors = ('turquoise', 'orange')
-    edges = collections.defaultdict(list)
-
-    for edge in graph.get_edge_list():
-        edges[edge.get_source()].append(int(edge.get_destination()))
-
-    for edge in edges:
-        edges[edge].sort()    
-        for i in range(2):
-            dest = graph.get_node(str(edges[edge][i]))[0]
-            dest.set_fillcolor(colors[i])
-
-    return Image(graph.create_png())
-
+    fig,ax = plt.subplots(figsize=(15,7))
+    _ = plot_tree( models , feature_names=['x','y'] , 
+               fontsize=12 , filled=True , impurity=False , precision=3, ax=ax)
+    plt.show()
+    return
 
 from sklearn.ensemble import RandomForestClassifier
 from matplotlib.gridspec import GridSpec
@@ -823,7 +808,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_curve, auc
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.preprocessing import label_binarize
-from scipy import interp
+
 from itertools import cycle
 
 def contour_lr_more(p,X,y,c,mult):
