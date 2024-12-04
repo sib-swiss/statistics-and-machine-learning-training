@@ -1,0 +1,4 @@
+pandas
+seaborn ~= 0.13
+statsmodels == 0.14.0
+scikit-learn ~=0.15
