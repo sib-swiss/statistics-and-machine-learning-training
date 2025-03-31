@@ -8,6 +8,7 @@ print("fraction of class benign in full ",sum(y_heart)/len(y_heart))
 
 ### takes ~1minute to run
 
+from sklearn.preprocessing import StandardScaler,PolynomialFeatures
 # don't forget the scaler , 
 # I also put a polynomial there, but with a twist : I will not really go for power 2,3,4..., 
 #  but rather use it to create the interaction terms between the different features.,
@@ -36,7 +37,7 @@ print('Grid best parameter (max.'+grid_lr_heart.scoring+'): ',
 # rbf kernel
 pipeline_SVM_heart = Pipeline([('scalar',StandardScaler()),
                                ("classifier", SVC(class_weight='balanced', probability=True, kernel='rbf'))])
-grid_values2 = {"classifier__gamma": np.logspace(-2,1,30)},
+grid_values2 = {"classifier__gamma": np.logspace(-2,1,30)}
 grid_svm_rbf_heart = GridSearchCV(pipeline_SVM_heart, grid_values2, 
                         n_jobs=-1, scoring="balanced_accuracy") 
 grid_svm_rbf_heart.fit(X_train_heart, y_train_heart)
@@ -157,6 +158,6 @@ df = pd.DataFrame( {'y_true' : y_test_heart,
 fig,ax = plt.subplots(figsize=(10,5))
 sns.violinplot( x='y_true',
                y='proba_class1', 
-               hue = 'y_predicted',
-               data=df, ax=ax , cut=0, scale = 'count', dodge=False)
-    
+               density_norm='count',
+               data=df, ax=ax , cut=0)
+ax.axhline(0.5 , color = 'black')

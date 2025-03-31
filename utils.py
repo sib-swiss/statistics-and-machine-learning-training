@@ -272,7 +272,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_curve, auc
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.preprocessing import label_binarize
-from scipy import interpolate as interp
+from scipy.interpolate import interp1d 
 from itertools import cycle
 from sklearn.preprocessing import StandardScaler
 
@@ -409,7 +409,7 @@ def contour_lr(p,X,y,c,mult):
         # Then interpolate all ROC curves at this points
         mean_tpr = np.zeros_like(all_fpr)
         for i in range(n_classes):
-            mean_tpr += interp(all_fpr, fpr[i], tpr[i])
+            mean_tpr += interp1d(fpr[i], tpr[i])(all_fpr)
 
         # Finally average it and compute AUC
         mean_tpr /= n_classes
@@ -565,7 +565,7 @@ def contour_SVM(X,y,c,ker,deg=2,gam=1,mult='ovr'):
         # Then interpolate all ROC curves at this points
         mean_tpr = np.zeros_like(all_fpr)
         for i in range(n_classes):
-            mean_tpr += interp(all_fpr, fpr[i], tpr[i])
+            mean_tpr += interp1d(fpr[i], tpr[i])(all_fpr)
 
         # Finally average it and compute AUC
         mean_tpr /= n_classes
@@ -812,7 +812,11 @@ from sklearn.preprocessing import label_binarize
 from itertools import cycle
 
 def contour_lr_more(p,X,y,c,mult):
-    models = LogisticRegression(penalty = p,C=c, multi_class=mult)# Create the logistic regresison object(with 3 main hyperparameters!!)
+    if mult == 'multinomial':
+        models = LogisticRegression(penalty = p,C=c)# Create the logistic regression object
+    else: # one vs rest
+        models = OneVsRestClassifier(LogisticRegression(penalty = p,C=c))
+
     # penalty is either l1 or l2, C is how much weight we put on the regularization, multi_calss is how we proceed when multiclasses
     models = models.fit(X, y)
     dico_color={0:'blue',1:'white',2:'red'}
@@ -829,8 +833,14 @@ def contour_lr_more(p,X,y,c,mult):
 
     plot_contours(ax1, models, xx, yy,cmap=plt.cm.coolwarm, alpha=0.8)
     ax1.scatter(X0, X1, c=y, cmap=plt.cm.coolwarm, s=20, edgecolors='k')
-    interc=models.intercept_
-    wei=models.coef_
+    if mult == 'multinomial' :
+        interc=models.intercept_
+        wei=models.coef_
+    else:
+        interc = np.array( [ m.intercept_.squeeze() for m in models.estimators_ ] )
+        wei = np.array( [ m.coef_.squeeze() for m in models.estimators_ ] )
+        
+
     for i in range(len(interc)):
         ax1.plot([xx.min(),xx.max()],[-(interc[i]+wei[i][0]*xx.min())/wei[i][1],-(interc[i]+wei[i][0]*xx.max())/wei[i][1]],
                  color=dico_color[i],ls='--')
@@ -839,7 +849,6 @@ def contour_lr_more(p,X,y,c,mult):
     ax1.set_xticks(())
     ax1.set_yticks(())
     ax1.set_title(titles)
-        #plt.savefig('C:\\Users\\sebas\\Desktop\\cours_scikit-learn\\Iris_example_knn_1_'+str(i)+'.pdf')
         
     plt.show()
     
@@ -905,7 +914,7 @@ def contour_lr_more(p,X,y,c,mult):
         # Then interpolate all ROC curves at this points
         mean_tpr = np.zeros_like(all_fpr)
         for i in range(n_classes):
-            mean_tpr += interp(all_fpr, fpr[i], tpr[i])
+            mean_tpr += interp1d(fpr[i], tpr[i])(all_fpr)
 
         # Finally average it and compute AUC
         mean_tpr /= n_classes
