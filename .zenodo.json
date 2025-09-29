@@ -1,0 +1,20 @@
+{
+  "upload_type": "lesson",
+  "title": "Course material Statistics and Machine Learning",
+  "license": "cc-by-4.0",
+  "keywords": [
+    "Machine Learning",
+    "Statistics",
+    "python",
+    "bioinformatics",
+    "course",
+    "training"
+  ],
+  "creators": [
+    {
+      "name": "Duchemin, Wandrille",
+      "affiliation": "SIB Swiss Institute of Bioinformatics",
+      "orcid": "0000-0001-8854-7235"
+    },
+  ]
+}
