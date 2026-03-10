@@ -17,8 +17,8 @@ pipeline_lr_heart=Pipeline([('scalar',StandardScaler()),
                             ('model',LogisticRegression(class_weight='balanced', solver = "liblinear"))])
 
 grid_values = {'poly__degree':[1,2],
-               'model__C': np.logspace(-5,2,100),
-               'model__penalty':['l1','l2']}
+               'model__C': np.logspace(-5,2,40),
+               'model__l1_ratio':np.linspace(0,1,11)}
 
 grid_lr_heart = GridSearchCV(pipeline_lr_heart, 
                                      param_grid = grid_values, 

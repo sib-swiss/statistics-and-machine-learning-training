@@ -17,8 +17,8 @@ pipeline_lr_cancer=Pipeline([('scaler',StandardScaler()),
                              ('model',LogisticRegression(solver = 'liblinear'))])
 
 #define the hyper-parameter space to explore
-grid_values = { 'model__C': np.logspace(-5,2,100),
-               'model__penalty':['l1','l2'] }
+grid_values = { 'model__C': np.logspace(-5,2,40),
+               'model__l1_ratio':np.linspace(0,1,11) }
 
 #define the GridSearchCV object
 grid_cancer = GridSearchCV( pipeline_lr_cancer, 
