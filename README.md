@@ -19,6 +19,8 @@ In addition, please ensure you have the following libraries installed:
  * [seaborn](https://seaborn.pydata.org/installing.html)
  * [statsmodels](https://www.statsmodels.org/stable/install.html)
  * [scikit-learn](https://scikit-learn.org/stable/install.html)
+ * [plotly](https://plotly.com/python/getting-started/)
+ * [ipywidget](https://ipywidgets.readthedocs.io/en/stable/user_install.html)
 
 > NB: we will use several other libraries, such as numpy, scipy, matplotlib, or pandas, but they are pre-requisites of the 3 above, so they should be installed automatically if you install using pip or conda.
 
