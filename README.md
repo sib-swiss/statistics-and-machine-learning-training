@@ -1,5 +1,4 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10406621.svg)](https://doi.org/10.5281/zenodo.10406621)
-
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19450712.svg)](https://doi.org/10.5281/zenodo.19450712)
 
 
 This is the github repository for the "statistics and machine learning for life science" course at [SIB](https://www.sib.swiss).
@@ -45,4 +44,4 @@ Note also the `utils.py` file contains many utilitary function we use to visuall
 
 Please cite as : 
 
- * Duchemin, W. (2023, December 19). Statistics and Machine Learning in Life Science - 2023 edition. Zenodo. https://doi.org/10.5281/zenodo.10406621
+ * Duchemin, W., & Tran, V. D. (2026, April 1). Course material Statistics and Machine Learning. Zenodo. https://doi.org/10.5281/zenodo.19450712
