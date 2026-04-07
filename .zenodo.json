@@ -1,12 +1,9 @@
 {
-  "upload_type": "lesson",
   "title": "Course material Statistics and Machine Learning",
+  "upload_type": "lesson",
   "license": "cc-by-4.0",
   "keywords": [
-    "machine learning",
-    "statistics",
     "python",
-    "bioinformatics",
     "course",
     "training"
   ],
